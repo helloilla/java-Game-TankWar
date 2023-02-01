@@ -6,7 +6,7 @@ import java.util.Random;
 public class Robot extends Tank {
 
     static Random random = new Random();
-    static Direction[] directions = {Direction.DOWN, Direction.UP, Direction.RIGHT, Direction.LEFT};
+    static Direction[] directions = {Direction.DOWN, Direction.UP, Direction.RIGHT, Direction.LEFT,Direction.DOWN, Direction.UP, Direction.RIGHT, Direction.LEFT,Direction.DOWN};
     int count;
 
     public Robot(String path, int x, int y, GameFrame gameFrame, Direction direction) {
@@ -25,7 +25,7 @@ public class Robot extends Tank {
         right=false;
         down=false;
         count=0;
-        this.direction = directions[random.nextInt(4)];
+        this.direction = directions[random.nextInt(9)];
         switch (direction) {
             case LEFT:
                 left = true;

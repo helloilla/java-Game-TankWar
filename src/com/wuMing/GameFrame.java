@@ -19,14 +19,13 @@ public class GameFrame extends JFrame {
     private int gameMode = 1;
     private boolean isPlaying = false;
 
-    private List<PlayerOne> players;
-
     // 游戏元素列表
+    List<PlayerOne> players;
     List<Bullet> playerBullets;
     List<Bullet> enemyBullets;
     List<Robot> enemy;
-    List<Wall> walls = new ArrayList<>();
-    List<Base> bases = new ArrayList<>();
+    List<Wall> walls;
+    List<Base> bases;
 
     private void hitEnemy() {
         Iterator it = playerBullets.iterator();
@@ -102,23 +101,66 @@ public class GameFrame extends JFrame {
     }
 
 
-    private void initEnemy() {
-//        Random r=new Random();
-        int x = 40;
-        for (int i = 0; i < 4; i++) {
-            enemy.add(new Robot("./images/tank3", x + i * 280, 70, this, Direction.DOWN));
-        }
-        players = new ArrayList<>();
-        players.add(new PlayerOne("images/tank1", 40, 70, this, Direction.UP));
+    private void initData() {
+//        int x = 40;
+        enemy = new ArrayList<>();
+        enemyBullets = new ArrayList<>();
+        playerBullets = new ArrayList<>();
+        bases=new ArrayList<>();
+        walls=new ArrayList<>();
+        players=new ArrayList<>();
+        //创建游戏画布
+        offStreamImage = this.createImage(with, height);
 
-        for (int i = 0; i < 12; i++) {
-            if (i % 2 == 0)
-                walls.add(new Wall(x + i * 60, 340, this));
-        }
 
+        initEnemy();
+
+        initPlayers();
+
+        initWalls();
+
+        initBases();
+    }
+
+    private void initBases() {
         bases.add(new Base("./images/star.gif", with / 2 - Base.length / 2, height - Base.length, this));
         bases.add(new Base("./images/symbol.gif", with / 2 - Base.length / 2, 0, this));
 
+    }
+
+    private void initWalls() {
+//        for (int i = 0; i < 15; i++) {
+////            if (i % 2 == 0)
+//                walls.add(new Wall(40 + i * 60, 120, this));
+////                walls.add(new Wall(40 + i * 60, 340, this));
+//        }
+
+        int x=with/2-60-30,y=0;
+        walls.add(new Wall(x,y,this));
+        walls.add(new Wall(x,y+60,this));
+        y=height-60;
+        walls.add(new Wall(x,y,this));
+        walls.add(new Wall(x,y-60,this));
+        x+=60;y=height-120;
+        walls.add(new Wall(x,y,this));
+        walls.add(new Wall(x+60,y,this));
+        y=60;
+        walls.add(new Wall(x,y,this));
+        walls.add(new Wall(x+60,y,this));
+
+        walls.add(new Wall(x+60,0,this));
+        walls.add(new Wall(x+60,height-60,this));
+    }
+
+    private void initPlayers() {
+
+        players.add(new PlayerOne("images/tank1", 200, 500, this, Direction.UP));
+    }
+
+    private void initEnemy(){
+        for (int i = 0; i < 4; i++) {
+            enemy.add(new Robot("./images/tank3", 40 + i * 280, 20, this, Direction.DOWN));
+        }
     }
 
     private void hitPlayers() {
@@ -138,23 +180,25 @@ public class GameFrame extends JFrame {
     private void launch() {
         this.setSize(with, height + 41);
         setTitle("坦克大战1.0");
+        // 窗口居中
         setLocationRelativeTo(null);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
+        // 添加键盘监听
         addKeyListener(new KeyMonitor());
     }
 
     public GameFrame() {
-        enemy = new ArrayList<>();
-        enemyBullets = new ArrayList<>();
-        playerBullets = new ArrayList<>();
+        // 窗口绘制
         launch();
-        initEnemy();
 
+        initData();
+
+        // 游戏画面重绘
         while (true) {
             repaint();
             try {
-                Thread.sleep(25);
+                Thread.sleep(25); //间隔毫秒
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -162,18 +206,15 @@ public class GameFrame extends JFrame {
     }
 
     private void paintMenu(Graphics g) {
-        if (offStreamImage == null) {
-            offStreamImage = this.createImage(with, height);
-        }
-        Graphics offG = offStreamImage.getGraphics();
-        offG.setColor(Color.black);
-        offG.fillRect(0, 0, with, height);
 
-        offG.setColor(Color.ORANGE);
-        offG.setFont(new Font("宋体", Font.BOLD, 50));
-        offG.drawString("选择游戏模式", 220, 100);
-        offG.drawString("单人模式", 250, 300);
-        offG.drawString("双人模式", 250, 400);
+
+        g.setColor(Color.black);
+        g.fillRect(0, 0, with, height);
+        g.setColor(Color.ORANGE);
+        g.setFont(new Font("宋体", Font.BOLD, 50));
+        g.drawString("选择游戏模式", 220, 100);
+        g.drawString("单人模式", 250, 300);
+        g.drawString("双人模式", 250, 400);
 
         int y = 0;
         if (gameMode == 1) {
@@ -181,63 +222,62 @@ public class GameFrame extends JFrame {
         } else if (gameMode == 2) {
             y = 355;
         }
-        offG.drawImage(select, 180, y, null);
+        g.drawImage(select, 180, y, null);
 
-        g.drawImage(offStreamImage, 0, 36, null);
+
 
     }
 
     @Override
     public void paint(Graphics g) {
+        if(offStreamImage==null){
+            offStreamImage=createImage(with,height);
+        }
 
+        Graphics graphics = offStreamImage.getGraphics();
 
         if (!isPlaying) {
-            paintMenu(g);
+            paintMenu(graphics);
         } else {
-            paintGame(g);
+            paintGame(graphics);
         }
-
-    }
-
-    private void paintGame(Graphics g) {
-//        offStreamImage = null;
-//        offStreamImage = createImage(with, height);
-        Graphics offG = offStreamImage.getGraphics();
-        offG.setColor(Color.black);
-        offG.fillRect(0, 0, with, height);
-        offG.drawString("正在游戏", 200, 200);
-
-        clearOutBorderBullets();
-
-
-        hitCheck();
-
-
-        for (PlayerOne player : players) {
-            player.paintSelf(offG);
-        }
-
-        for (Bullet bullet : playerBullets) {
-            bullet.paintSelf(offG);
-        }
-        for (Bullet bullet : enemyBullets) {
-            bullet.paintSelf(offG);
-        }
-        for (Robot robot : enemy) {
-            robot.paintSelf(offG);
-        }
-
-        for (Wall wall : walls) {
-            wall.paintSelf(offG);
-        }
-
-        for (Base basis : bases) {
-            basis.paintSelf(offG);
-        }
-
         g.drawImage(offStreamImage, 0, 36, null);
     }
 
+    private void paintGame(Graphics g) {
+
+        g.setColor(Color.black);
+        g.fillRect(0, 0, with, height);
+        g.drawString("正在游戏", 200, 200);
+
+        clearOutBorderBullets();
+
+        hitCheck();
+
+        for (PlayerOne player : players) {
+            player.paintSelf(g);
+        }
+
+        for (Bullet bullet : playerBullets) {
+            bullet.paintSelf(g);
+        }
+        for (Bullet bullet : enemyBullets) {
+            bullet.paintSelf(g);
+        }
+        for (Robot robot : enemy) {
+            robot.paintSelf(g);
+        }
+
+        for (Wall wall : walls) {
+            wall.paintSelf(g);
+        }
+
+        for (Base basis : bases) {
+            basis.paintSelf(g);
+        }
+
+
+    }
 
     class KeyMonitor extends KeyAdapter {
         @Override
