@@ -16,7 +16,7 @@ public class GameFrame extends JFrame {
     private final int with = 1000, height = 800;
     final int gameWith = 1000, gameHeight = 800;
     private Image select = Toolkit.getDefaultToolkit().getImage("images/player.png");
-    private int gameMode = 1;
+    private int gameMode = 1; //1 ,2 ,3 ,4 ,5
     private boolean isPlaying = false;
 
     // 游戏元素列表
@@ -26,6 +26,8 @@ public class GameFrame extends JFrame {
     List<Robot> enemy;
     List<Wall> walls;
     List<Base> bases;
+    List<Grass>grasses;
+    List<Water>waters;
 
     private void hitEnemy() {
         Iterator it = playerBullets.iterator();
@@ -109,6 +111,8 @@ public class GameFrame extends JFrame {
         bases=new ArrayList<>();
         walls=new ArrayList<>();
         players=new ArrayList<>();
+        grasses=new ArrayList<>();
+        waters=new ArrayList<>();
         //创建游戏画布
         offStreamImage = this.createImage(with, height);
 
@@ -119,7 +123,23 @@ public class GameFrame extends JFrame {
 
         initWalls();
 
+        initGrasses();
+
         initBases();
+
+        initWaters();
+    }
+
+    private void initWaters() {
+        for (int i = 0; i < 6; i++) {
+            waters.add(new Water(500+60*i,height/2,this));
+        }
+    }
+
+    private void initGrasses() {
+        for (int i = 0; i < 6; i++) {
+            grasses.add(new Grass(100+60*i,height/2,this));
+        }
     }
 
     private void initBases() {
@@ -275,6 +295,16 @@ public class GameFrame extends JFrame {
         for (Base basis : bases) {
             basis.paintSelf(g);
         }
+
+        for (Grass grass : grasses) {
+            grass.paintSelf(g);
+        }
+
+        for (Water water : waters) {
+            water.paintSelf(g);
+        }
+
+
 
 
     }
